@@ -1,0 +1,163 @@
+body{
+  background: #332517;
+
+}
+.modal {
+  display: none;
+  width: 350px;
+  height: 380px;
+  position: fixed;
+  z-index: 5; 
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: #996633;
+  box-shadow: 0 0 60px 10px #996633;
+  border-radius: 35px 0 35px  0 ;
+  text-align: center;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+.modal-guts p{
+  font-size: 2.5em;
+  background: #996633;
+  font-weight: bold;
+}
+.modal-guts label{
+  font-size: 1.5em;
+}
+.modal-guts input[type=text]{
+  margin: 10px;
+  width: 90%;
+  border: 0;
+  border-radius: 5px;
+  font-size: 1.8em;
+  height: 50px;
+}
+.modal-guts {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+.close-button {
+  margin: 10px;
+  width: 90%;
+  background: #332517;
+  cursor: pointer;
+  border: 0;
+  border-radius: 5px;
+  color: #ffffff;
+  font-size: 1.8em;
+  height: 50px;
+}
+.chat{
+  display: block;
+  position: relative;
+  width: 600px;
+  height: 90%; 
+  background: #ffffff;
+  border-radius: 7px;
+  top: 50%;
+  transform: translate(0, -50%);
+  float: left;
+}
+.chatInput{
+  display: block;
+  position: fixed;
+  padding: 0;
+  width: 100%;
+  bottom: 7px;
+  text-align: center;
+}
+.chatFormInput{
+  margin: 0;
+  padding: 0;
+  width: 66%;
+  height: 30px;
+  border-radius: 7px;
+}
+.chatFormSubmit{
+  margin: 0;
+  padding: 0;
+  width: 20%;
+  height: 30px;
+  border-radius: 7px;  
+  background: #332517;
+  color: #ffffff;
+  cursor: pointer;
+}
+.chatMessages{
+  display: block;
+  position: fixed;
+  bottom: 60px;
+  padding: 15px;
+  width: 93%;
+  height: calc(100% - 135px);
+  overflow-y: auto;
+}
+.messages{
+  width: 100%;
+}
+.users{
+  display: block;
+  position: relative;
+  width: 200px;
+  height: 90%; 
+  background: #ffffff;
+  border-radius: 7px;
+  top: 50%;
+  transform: translate(0, -50%);
+  float: right;
+  overflow-y: auto;
+}
+.user{
+  margin: 10px;
+  color: #332517;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-size: 1.2em;
+
+}
+.content{
+  display: block;
+  position: fixed;
+  width: 820px;
+  height: 100%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+hr{
+  border: solid 1px #332517;
+  width: 95%;
+}
+.chatExitButton{ 
+  display: block;
+  position: fixed;
+  top: 7px;
+  right: 10px;
+  height: 30px;
+  background: #332517;
+  color: #ffffff;
+  cursor: pointer;
+  width: 20%;
+  border-radius: 7px;  
+  clear: both;
+}
+.span1 {
+  font-weight: bold;
+  font-size: 0.8em;
+  text-decoration: underline;
+  color: #df0808;
+
+}
+.span2 {
+  font-weight: bold;
+  font-size: 0.8em;
+  text-decoration: underline;
+}
+p{
+  font-size: 1.2em;
+}
+

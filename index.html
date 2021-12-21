@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="UTF-8">
+	<title>Анонимный чат Chat'ик</title>
+	<link rel="stylesheet" href="style.css">
+	<script type="text/javascript" src="jquery.js"></script>
+</head>
+<body>
+<!--Модальное окно-->
+<div class="modal" id="modal">
+  <form class="modal-guts">
+    <p>Анонимный чат<br />Chat'ик</p>
+	<label for="name">Представьтесь и общайтесь</label></br>
+	<input type="text" name="name" id="name" autocomplete="off" /></br>
+	<input type="button" class="close-button" id="close-button" value="Присоединиться" />
+  </form>
+</div>
+<div class="content">
+<!--Контейнер для отправки и отображения сообщений-->
+    <div class="chat">
+        <div class="chatExit">
+			<button type="submit" class="chatExitButton" id="chatExitButton" onClick="chatExitButton();">Выход</button>
+		</div>
+	    <div class="chatMessages">
+		    <div class="messages"></div>
+	    </div>
+	    <div class="chatInput" id="chatInput">
+		    <form method="post" name="chatForm" id="chatForm"  onsubmit="return false;">
+				<hr />
+				<label for="messageText">ВЫ: </label>
+				<input type="text" name="messageText" class="chatFormInput" placeholder="&nbsp;&nbsp;Введите сообщение" autocomplete="off" />
+                <input type="submit" class="chatFormSubmit" onClick="addMessages();" value="=>" />
+		    </form>
+	    </div>
+    </div>
+<!--Контейнер для отображения юзеров-->
+    <div class="users" id="users">
+		<div class="user"></div>
+    </div>
+</div>
+<!------------------------------------>
+<script>
+let user = new Array();
+let USER = sessionStorage.getItem("user");
+if(USER == null) {
+    //Отображение модального окна
+    Modal();
+	//Получение значения формы
+    $(document).ready(function(){
+        // Регистрируем юзера при нажатии кнопки + выводит всех юзеров
+        $("#close-button").click(function(){
+            let name = $("#name").val().trim();
+		    $(".error").remove();
+		    if (name.length< 1) {
+                $("#close-button").after('<span class="error">Вы не представились</span>');
+            }
+		    else{
+				chatMessages();	
+			    //Скрытие модального окна
+			    Modal();	
+	            let url = "addUser.php";
+		        $.post(url, {name}, function(data){
+			        result = $.parseJSON(data);			
+			        $(".user").append(result[1]+'<hr />');				
+			        for(let i = 0; i < result[2]-1; i++){
+				        $(".user").append(result[3+i]+'<br />');
+			        }
+			        let id_user = result[0];
+			        let name = result[1];
+           
+			        //Запись в sessionStorage
+	                user.push({"id_user":id_user, "name": name});
+				    USER = JSON.stringify(user);
+	                sessionStorage.setItem("user", USER);  
+            
+			        //Автозапрос списка юзеров
+                    if(id_user && name){
+                        let timer, start = 15000; //15 секунд переведенная в милисикунды
+                        timer = setInterval(function(){
+                            $.ajax({
+                                type: "POST",
+                                url: "editUser.php",
+			                    data: {"ID_user": id_user, "Name": name},
+                                success: function(data){
+				                    $(".user").empty();
+				                    result = $.parseJSON(data);
+								    let err = result[0];
+								    if(err == "err"){
+									    //Очистка sessionStorage
+									    sessionStorage.clear();
+									    //Обнавление браузера
+									    window.location.reload();
+								    }
+								    else{
+									    $(".user").append(result[1]+'<hr />');				
+				                        for(let i = 0; i < result[2]-1; i++){
+					                        $(".user").append(result[3+i]+'<br />');
+				                        }				
+								    }
+                                }
+                            });
+                        }, start);
+			    	}
+	            })
+		    }		
+	    }); 	
+	});
+}
+else{
+    //Получение сведений из sessionStorage
+    let USER = sessionStorage.getItem("user");
+    USER = JSON.parse(USER);
+    let id_user = USER[0].id_user;
+    let name = USER[0].name;
+    //Запрос списка юзеров
+	chatMessages();	
+	$.ajax({
+        type: "POST",
+        url: "editUser.php",
+		data: {"ID_user": id_user, "Name": name},
+        success: function(data){
+			result = $.parseJSON(data);
+			let err = result[0];
+			if(err == "err"){
+				//Очистка sessionStorage
+				sessionStorage.clear();
+				//Обнавление браузера
+				window.location.reload();
+			}
+			else{
+				$(".user").append(result[1]+'<hr />');				
+				for(let i = 0; i < result[2]-1; i++){
+					$(".user").append(result[3+i]+'<br />');
+				}				
+			}
+        }
+    });
+    //Автозапрос списка юзеров
+    if(id_user && name){
+        let timer, start = 15000; //15 секунд переведенная в милисикунды
+        timer = setInterval(function(){
+			$.ajax({
+                type: "POST",
+                url: "editUser.php",
+			    data: {"ID_user": id_user, "Name": name},
+                success: function(data){
+				    $(".user").empty();
+
+				    result = $.parseJSON(data);
+					let err = result[0];
+					if(err == "err"){
+						//Очистка sessionStorage
+						sessionStorage.clear();
+						//Обнавление браузера
+						window.location.reload();
+					}
+					else{
+						$(".user").append(result[1]+'<hr />');				
+				        for(let i = 0; i < result[2]-1; i++){
+					        $(".user").append(result[3+i]+'<br />');
+				        }				
+					}
+                }
+            });
+        }, start);
+    }
+}
+//Скрыть/отобразить модальное окно
+function Modal() {
+    let modal = document.querySelector("#modal");
+	let chatInput = document.querySelector("#chatInput");
+	let chatExitButton = document.querySelector("#chatExitButton");
+
+    if (modal.style.display == "block" && chatInput.style.display == "none" && chatExitButton.style.display == "none"){
+	    modal.style.display = "none";
+		chatInput.style.display = "block";
+		chatExitButton.style.display = "block";		
+	}
+    else{
+        modal.style.display = "block"
+		chatInput.style.display = "none";
+		chatExitButton.style.display = "none";		
+	}
+}
+//Выход из чата
+function chatExitButton(){
+	//Получение сведений из sessionStorage
+    let USER = sessionStorage.getItem("user");
+    USER = JSON.parse(USER);
+    let id_user = USER[0].id_user;
+    //Выход из чата
+	$.ajax({
+		type: 'POST',
+        url: "exitUser.php", 
+        data: {"id_user": id_user},
+        success: function(data) { 
+			if(data == "exit"){
+			    //Очистка sessionStorage
+			    sessionStorage.clear();
+			    //Обнавление браузера
+				window.location.reload();
+			}
+		}     
+	})
+}
+//Вывод сообщений чата
+function chatMessages(){
+let total;    
+let id_messages;
+let option;
+let counter;
+let maxCounter = "50"//Вывод максималный сообщений
+let START = 0;
+let timer, start = 1000; //1 секунда переведенная в милисикунды
+let limit = 0;
+let MaxCounter;
+timer = setInterval(function(){
+    if(id_messages == null && option == null && counter == null && total == null) {
+        id_messages = "err";
+        total ="err";
+        option = 0;
+        counter = "err";
+    }
+        $.ajax({
+            type: "POST",
+            url: "chatMessages.php",
+            data: {"id_messages": id_messages, "option": option, "maxCounter": maxCounter, "counter": counter, "total": total},
+            success: function(data){  
+				console.log(data);         
+                result = $.parseJSON(data);
+                id_messages = result[0];
+                total = result[1];
+                option = result[2];
+                counter = result[3];
+                START = 0;
+                //Получение сведений из sessionStorage
+                let USER = sessionStorage.getItem("user");
+                USER = JSON.parse(USER);
+                let id_user = USER[0].id_user;
+
+                if(option == 2){
+				//Обнавление браузера
+				window.location.reload();
+					option = 1;
+				}
+                    for(counter; counter < total; counter++){ 
+						time = result[8 + START].split(' '); 
+                        data = time[0].split('-');
+						ID_user = result[6 + START];
+						//Установка личности
+						if(ID_user == id_user){
+							user = "Вы:";
+							span = "span1";
+						}
+						else{
+                            user = result[7 + START];
+							span = "span2";
+						}
+                        $(".messages").append("<p><span class=\""+span+"\">"+data[2]+"."+data[1]+"."+data[0]+"&nbsp;&nbsp;&nbsp;&nbsp;"+time[1]+"&nbsp;&nbsp;&nbsp;&nbsp;"+user+"</span><br />"+result[5 + START]+"</p>");
+                        START = START + 5;
+						$(function(){
+                            var chatResult = $(".chatMessages");
+                            chatResult.scrollTop(chatResult.prop("scrollHeight"));
+							limit++;
+						
+                        });
+                    }
+					MaxCounter = 0;
+					MaxCounter = maxCounter * 2;
+					if(limit >= MaxCounter){
+						option = 2;
+						limit = 0;
+						counter = 0;
+					}
+            }	
+        });
+}, start);
+}
+//Добавление сообщения
+function addMessages(){
+    //Получение сведений из sessionStorage
+    let USER = sessionStorage.getItem("user");
+    USER = JSON.parse(USER);
+    let id_user = USER[0].id_user;
+    let name = USER[0].name;
+	let messageText = $(".chatFormInput").val();
+	//alert(messageText);
+	$.ajax({
+		type: "POST",
+        url: "addMessages.php", 
+        data: {
+			"id_user": id_user,
+			"name": name,
+			"messageText": messageText
+		} 
+	})
+    //Очистка импута
+	$(".chatFormInput").val("");
+}
+</script>
+</body>
+</html>
+
